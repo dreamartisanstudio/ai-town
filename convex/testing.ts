@@ -135,7 +135,7 @@ export const debugCreatePlayers = internalMutation({
     for (let i = 0; i < args.numPlayers; i++) {
       const inputId = await insertInput(ctx, worldStatus.worldId, 'join', {
         name: `Robot${i}`,
-        description: `This player is a robot.`,
+        description: `这个玩家是一个机器人。`,
         character: `f${1 + (i % 8)}`,
       });
     }

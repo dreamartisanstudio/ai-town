@@ -255,16 +255,18 @@ export const conversationInputs = {
       playerId,
       invitee: playerId,
     },
-    handler: (game: Game, now: number, args): GameId<'conversations'> => {
+    handler: (game: Game, now: number, args): GameId<'conversations'> | null => {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID: ${playerId}`);
+        console.warn(`Player ${playerId} not found for startConversation, skipping.`);
+        return null;
       }
       const inviteeId = parseGameId('players', args.invitee);
       const invitee = game.world.players.get(inviteeId);
       if (!invitee) {
-        throw new Error(`Invalid player ID: ${inviteeId}`);
+        console.warn(`Invitee ${inviteeId} not found for startConversation, skipping.`);
+        return null;
       }
       console.log(`Starting ${playerId} ${inviteeId}...`);
       const { conversationId, error } = Conversation.start(game, now, player, invitee);
@@ -286,17 +288,20 @@ export const conversationInputs = {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID: ${playerId}`);
+        console.warn(`Player ${playerId} not found for startTyping, skipping.`);
+        return null;
       }
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID: ${conversationId}`);
+        console.warn(`Conversation ${conversationId} not found for startTyping, skipping.`);
+        return null;
       }
       if (conversation.isTyping && conversation.isTyping.playerId !== playerId) {
-        throw new Error(
+        console.warn(
           `Player ${conversation.isTyping.playerId} is already typing in ${conversationId}`,
         );
+        return null;
       }
       conversation.isTyping = { playerId, messageUuid: args.messageUuid, since: now };
       return null;
@@ -314,7 +319,8 @@ export const conversationInputs = {
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID: ${conversationId}`);
+        console.warn(`Conversation ${conversationId} not found for finishSendingMessage, skipping.`);
+        return null;
       }
       if (conversation.isTyping && conversation.isTyping.playerId === playerId) {
         delete conversation.isTyping;
@@ -337,12 +343,14 @@ export const conversationInputs = {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID ${playerId}`);
+        console.warn(`Player ${playerId} not found for acceptInvite, skipping.`);
+        return null;
       }
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID ${conversationId}`);
+        console.warn(`Conversation ${conversationId} not found for acceptInvite, skipping.`);
+        return null;
       }
       conversation.acceptInvite(game, player);
       return null;
@@ -360,12 +368,14 @@ export const conversationInputs = {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID ${playerId}`);
+        console.warn(`Player ${playerId} not found for rejectInvite, skipping.`);
+        return null;
       }
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID ${conversationId}`);
+        console.warn(`Conversation ${conversationId} not found for rejectInvite, skipping.`);
+        return null;
       }
       conversation.rejectInvite(game, now, player);
       return null;
@@ -381,12 +391,14 @@ export const conversationInputs = {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID ${playerId}`);
+        console.warn(`Player ${playerId} not found for leaveConversation, skipping.`);
+        return null;
       }
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID ${conversationId}`);
+        console.warn(`Conversation ${conversationId} not found for leaveConversation, skipping.`);
+        return null;
       }
       conversation.leave(game, now, player);
       return null;

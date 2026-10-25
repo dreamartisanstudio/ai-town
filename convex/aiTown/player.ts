@@ -282,7 +282,8 @@ export const playerInputs = {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID ${playerId}`);
+        console.warn(`Player ${playerId} not found for leave, skipping.`);
+        return null;
       }
       player.leave(game, now);
       return null;
@@ -297,7 +298,8 @@ export const playerInputs = {
       const playerId = parseGameId('players', args.playerId);
       const player = game.world.players.get(playerId);
       if (!player) {
-        throw new Error(`Invalid player ID ${playerId}`);
+        console.warn(`Player ${playerId} not found for moveTo, skipping.`);
+        return null;
       }
       if (args.destination) {
         movePlayer(game, now, player, args.destination);

@@ -3,8 +3,9 @@
 const OPENAI_EMBEDDING_DIMENSION = 1536;
 const TOGETHER_EMBEDDING_DIMENSION = 768;
 const OLLAMA_EMBEDDING_DIMENSION = 1024;
+const DASHSCOPE_EMBEDDING_DIMENSION = 1024;
 
-export const EMBEDDING_DIMENSION: number = OLLAMA_EMBEDDING_DIMENSION;
+export const EMBEDDING_DIMENSION: number = DASHSCOPE_EMBEDDING_DIMENSION;
 
 export function detectMismatchedLLMProvider() {
   switch (EMBEDDING_DIMENSION) {
@@ -35,7 +36,7 @@ export function detectMismatchedLLMProvider() {
 }
 
 export interface LLMConfig {
-  provider: 'openai' | 'together' | 'ollama' | 'custom';
+  provider: 'openai' | 'together' | 'ollama' | 'dashscope' | 'custom';
   url: string; // Should not have a trailing slash
   chatModel: string;
   embeddingModel: string;
@@ -44,6 +45,19 @@ export interface LLMConfig {
 }
 
 export function getLLMConfig(): LLMConfig {
+  if (process.env.DASHSCOPE_API_KEY) {
+    if (EMBEDDING_DIMENSION !== DASHSCOPE_EMBEDDING_DIMENSION) {
+      throw new Error(`EMBEDDING_DIMENSION must be ${DASHSCOPE_EMBEDDING_DIMENSION} for DashScope`);
+    }
+    return {
+      provider: 'dashscope',
+      url: process.env.DASHSCOPE_API_URL ?? 'https://dashscope.aliyuncs.com/compatible-mode',
+      chatModel: process.env.DASHSCOPE_CHAT_MODEL ?? 'qwen-plus',
+      embeddingModel: process.env.DASHSCOPE_EMBEDDING_MODEL ?? 'text-embedding-v3',
+      stopWords: [],
+      apiKey: process.env.DASHSCOPE_API_KEY,
+    };
+  }
   let provider = process.env.LLM_PROVIDER;
   if (provider ? provider === 'openai' : process.env.OPENAI_API_KEY) {
     if (EMBEDDING_DIMENSION !== OPENAI_EMBEDDING_DIMENSION) {

@@ -44,7 +44,8 @@ export async function rememberConversation(
       role: 'user',
       content: `You are ${player.name}, and you just finished a conversation with ${otherPlayer.name}. I would
       like you to summarize the conversation from ${player.name}'s perspective, using first-person pronouns like
-      "I," and add if you liked or disliked this interaction.`,
+      "I," and add if you liked or disliked this interaction.
+      IMPORTANT: Write the summary in Chinese (简体中文).`,
     },
   ];
   const authors = new Set<GameId<'players'>>();
@@ -356,7 +357,10 @@ async function reflectOnMemories(
     'Return in JSON format, where the key is a list of input statements that contributed to your insights and value is your insight. Make the response parseable by Typescript JSON.parse() function. DO NOT escape characters or include "\n" or white space in response.',
   );
   prompt.push(
-    'Example: [{insight: "...", statementIds: [1,2]}, {insight: "...", statementIds: [1]}, ...]',
+    'The insight text MUST be written in Chinese (简体中文), but the JSON keys remain in English.',
+  );
+  prompt.push(
+    'Example: [{insight: "中文洞察内容...", statementIds: [1,2]}, {insight: "中文洞察内容...", statementIds: [1]}, ...]',
   );
 
   const { content: reflection } = await chatCompletion({

@@ -4,9 +4,13 @@ const OPENAI_EMBEDDING_DIMENSION = 1536;
 const TOGETHER_EMBEDDING_DIMENSION = 768;
 const OLLAMA_EMBEDDING_DIMENSION = 1024;
 
-export const EMBEDDING_DIMENSION: number = OLLAMA_EMBEDDING_DIMENSION;
+export const EMBEDDING_DIMENSION: number = 1536; // MiniMax embo-01
 
 export function detectMismatchedLLMProvider() {
+  // Custom OpenAI-compatible endpoint (e.g. MiniMax) takes precedence.
+  if (process.env.LLM_API_URL) {
+    return;
+  }
   switch (EMBEDDING_DIMENSION) {
     case OPENAI_EMBEDDING_DIMENSION:
       if (!process.env.OPENAI_API_KEY) {

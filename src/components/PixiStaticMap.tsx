@@ -6,20 +6,21 @@ import * as gentlesparkle from '../../data/animations/gentlesparkle.json';
 import * as gentlewaterfall from '../../data/animations/gentlewaterfall.json';
 import * as gentlesplash from '../../data/animations/gentlesplash.json';
 import * as windmill from '../../data/animations/windmill.json';
+import { assetUrl } from '../assetUrl.ts';
 
 const animations = {
-  'campfire.json': { spritesheet: campfire, url: '/ai-town/assets/spritesheets/campfire.png' },
+  'campfire.json': { spritesheet: campfire, url: 'assets/spritesheets/campfire.png' },
   'gentlesparkle.json': {
     spritesheet: gentlesparkle,
-    url: '/ai-town/assets/spritesheets/gentlesparkle32.png',
+    url: 'assets/spritesheets/gentlesparkle32.png',
   },
   'gentlewaterfall.json': {
     spritesheet: gentlewaterfall,
-    url: '/ai-town/assets/spritesheets/gentlewaterfall32.png',
+    url: 'assets/spritesheets/gentlewaterfall32.png',
   },
-  'windmill.json': { spritesheet: windmill, url: '/ai-town/assets/spritesheets/windmill.png' },
+  'windmill.json': { spritesheet: windmill, url: 'assets/spritesheets/windmill.png' },
   'gentlesplash.json': { spritesheet: gentlesplash,
-    url: '/ai-town/assets/spritesheets/gentlewaterfall32.png',},
+    url: 'assets/spritesheets/gentlewaterfall32.png',},
 };
 
 export const PixiStaticMap = PixiComponent('StaticMap', {
@@ -27,7 +28,7 @@ export const PixiStaticMap = PixiComponent('StaticMap', {
     const map = props.map;
     const numxtiles = Math.floor(map.tileSetDimX / map.tileDim);
     const numytiles = Math.floor(map.tileSetDimY / map.tileDim);
-    const bt = PIXI.BaseTexture.from(map.tileSetUrl, {
+    const bt = PIXI.BaseTexture.from(assetUrl(map.tileSetUrl), {
       scaleMode: PIXI.SCALE_MODES.NEAREST,
     });
 
@@ -81,7 +82,7 @@ export const PixiStaticMap = PixiComponent('StaticMap', {
         continue;
       }
       const { spritesheet, url } = animation;
-      const texture = PIXI.BaseTexture.from(url, {
+      const texture = PIXI.BaseTexture.from(assetUrl(url), {
         scaleMode: PIXI.SCALE_MODES.NEAREST,
       });
       const spriteSheet = new PIXI.Spritesheet(texture, spritesheet);

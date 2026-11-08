@@ -2,6 +2,7 @@ import { BaseTexture, ISpritesheetData, Spritesheet } from 'pixi.js';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatedSprite, Container, Graphics, Text } from '@pixi/react';
 import * as PIXI from 'pixi.js';
+import { assetUrl } from '../assetUrl.ts';
 
 export const Character = ({
   textureUrl,
@@ -41,7 +42,7 @@ export const Character = ({
   useEffect(() => {
     const parseSheet = async () => {
       const sheet = new Spritesheet(
-        BaseTexture.from(textureUrl, {
+        BaseTexture.from(assetUrl(textureUrl), {
           scaleMode: PIXI.SCALE_MODES.NEAREST,
         }),
         spritesheetData,

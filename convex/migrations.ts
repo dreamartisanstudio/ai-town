@@ -67,16 +67,22 @@ export const localizeDefaultWorld = internalMutation({
       }
     }
 
-    for (const playerId of humanPlayerIds) {
-      const playerDescription = descriptionsByPlayer.get(playerId);
-      if (!playerDescription || playerDescription.name === DEFAULT_NAME) {
+    const agentPlayerIds = new Set(world.agents.map((a) => a.playerId));
+    for (const playerDescription of playerDescriptions) {
+      if (agentPlayerIds.has(playerDescription.playerId)) {
         continue;
       }
-      await ctx.db.patch(playerDescription._id, {
-        name: DEFAULT_NAME,
-        description: `${DEFAULT_NAME}是一位人类玩家`,
-      });
-      updatedPlayers += 1;
+      if (
+        playerDescription.name !== DEFAULT_NAME &&
+        (playerDescription.name === 'Me' ||
+          playerDescription.description === 'Me is a human player')
+      ) {
+        await ctx.db.patch(playerDescription._id, {
+          name: DEFAULT_NAME,
+          description: `${DEFAULT_NAME}是一位人类玩家`,
+        });
+        updatedPlayers += 1;
+      }
     }
 
     return { updatedAgents, updatedPlayers };

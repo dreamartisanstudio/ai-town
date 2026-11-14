@@ -180,11 +180,11 @@ export class Player {
           numHumans++;
         }
         if (player.human === tokenIdentifier) {
-          throw new Error(`You are already in this game!`);
+          throw new Error(`你已经在游戏中了！`);
         }
       }
       if (numHumans >= MAX_HUMAN_PLAYERS) {
-        throw new Error(`Only ${MAX_HUMAN_PLAYERS} human players allowed at once.`);
+        throw new Error(`同时最多只允许 ${MAX_HUMAN_PLAYERS} 位真人玩家。`);
       }
     }
     let position;
@@ -200,7 +200,7 @@ export class Player {
       break;
     }
     if (!position) {
-      throw new Error(`Failed to find a free position!`);
+      throw new Error(`找不到可用的空位置！`);
     }
     const facingOptions = [
       { dx: 1, dy: 0 },

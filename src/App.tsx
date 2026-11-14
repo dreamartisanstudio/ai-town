@@ -27,38 +27,34 @@ export default function Home() {
         isOpen={helpModalOpen}
         onRequestClose={() => setHelpModalOpen(false)}
         style={modalStyles}
-        contentLabel="Help modal"
+        contentLabel="帮助"
         ariaHideApp={false}
       >
         <div className="font-body">
-          <h1 className="text-center text-6xl font-bold font-display game-title">Help</h1>
+          <h1 className="text-center text-6xl font-bold font-display game-title">帮助</h1>
           <p>
-            Welcome to AI town. AI town supports both anonymous <i>spectators</i> and logged in{' '}
-            <i>interactivity</i>.
+            欢迎来到 AI Town。AI Town 既支持匿名的<i>旁观者</i>，也支持登录后的
+            <i>互动体验</i>。
           </p>
-          <h2 className="text-4xl mt-4">Spectating</h2>
+          <h2 className="text-4xl mt-4">旁观</h2>
           <p>
-            Click and drag to move around the town, and scroll in and out to zoom. You can click on
-            an individual character to view its chat history.
+            按住鼠标拖动可以移动视角，滚动滚轮可以缩放。点击某个角色即可查看它的聊天记录。
           </p>
-          <h2 className="text-4xl mt-4">Interactivity</h2>
+          <h2 className="text-4xl mt-4">互动</h2>
           <p>
-            If you log in, you can join the simulation and directly talk to different agents! After
-            logging in, click the "Interact" button, and your character will appear somewhere on the
-            map with a highlighted circle underneath you.
+            加入小镇后，你就可以直接和不同的 AI 角色对话！点击“互动”按钮，你的角色会出现在地图的某个位置，
+            脚下会有一个高亮的圆圈。
           </p>
-          <p className="text-2xl mt-2">Controls:</p>
-          <p className="mt-4">Click to navigate around.</p>
+          <p className="text-2xl mt-2">操作说明：</p>
+          <p className="mt-4">点击地面即可移动。</p>
           <p className="mt-4">
-            To talk to an agent, click on them and then click "Start conversation," which will ask
-            them to start walking towards you. Once they're nearby, the conversation will start, and
-            you can speak to each other. You can leave at any time by closing the conversation pane
-            or moving away. They may propose a conversation to you - you'll see a button to accept
-            in the messages panel.
+            想和某个角色对话时，先点击它，再点击“开始对话”，它会朝你走来。等它走到附近，对话就会开始，
+            你们就可以互相交谈了。你可以随时关闭对话面板或走开来离开对话。它们也可能主动邀请你聊天——
+            你会在消息面板里看到接受邀请的按钮。
           </p>
           <p className="mt-4">
-            AI town only supports {MAX_HUMAN_PLAYERS} humans at a time. If you're idle for five
-            minutes, you'll be automatically removed from the simulation.
+            AI Town 同时最多支持 {MAX_HUMAN_PLAYERS} 位真人玩家。如果你连续五分钟没有操作，
+            系统会自动将你移出小镇。
           </p>
         </div>
       </ReactModal>
@@ -78,7 +74,7 @@ export default function Home() {
         </h1>
 
         <div className="max-w-xs md:max-w-xl lg:max-w-none mx-auto my-4 text-center text-base sm:text-xl md:text-2xl text-white leading-tight shadow-solid">
-          A virtual town where AI characters live, chat and socialize.
+          一个由 AI 角色生活、聊天和社交的虚拟小镇。
           {/* <Unauthenticated>
             <div className="my-1.5 sm:my-0" />
             Log in to join the town
@@ -93,11 +89,11 @@ export default function Home() {
             <FreezeButton />
             <MusicButton />
             <Button href="https://github.com/a16z-infra/ai-town" imgUrl={starImg}>
-              Star
+              收藏
             </Button>
             <InteractButton />
             <Button imgUrl={helpImg} onClick={() => setHelpModalOpen(true)}>
-              Help
+              帮助
             </Button>
           </div>
           <a href="https://a16z.com">

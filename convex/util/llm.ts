@@ -216,11 +216,15 @@ export async function fetchEmbeddingBatch(texts: string[]) {
       ),
     };
   }
+  // MiniMax's embedding endpoint uses a different schema than OpenAI's:
+  // it takes `texts` and returns `{ vectors }` instead of `input` / `{ data }`.
+  const isMiniMax = config.url.includes('minimax');
   const {
     result: json,
     retries,
     ms,
   } = await retryWithBackoff(async () => {
+    const cleanTexts = texts.map((text) => text.replace(/\n/g, ' '));
     const result = await fetch(config.url + '/v1/embeddings', {
       method: 'POST',
       headers: {
@@ -228,10 +232,11 @@ export async function fetchEmbeddingBatch(texts: string[]) {
         ...AuthHeaders(),
       },
 
-      body: JSON.stringify({
-        model: config.embeddingModel,
-        input: texts.map((text) => text.replace(/\n/g, ' ')),
-      }),
+      body: JSON.stringify(
+        isMiniMax
+          ? { model: config.embeddingModel, texts: cleanTexts, type: 'db' }
+          : { model: config.embeddingModel, input: cleanTexts },
+      ),
     });
     if (!result.ok) {
       throw {
@@ -239,18 +244,32 @@ export async function fetchEmbeddingBatch(texts: string[]) {
         error: new Error(`Embedding failed with code ${result.status}: ${await result.text()}`),
       };
     }
-    return (await result.json()) as CreateEmbeddingResponse;
+    return (await result.json()) as CreateEmbeddingResponse | MiniMaxEmbeddingResponse;
   });
-  if (json.data.length !== texts.length) {
+  if (isMiniMax) {
+    const vectors = (json as MiniMaxEmbeddingResponse).vectors;
+    if (!Array.isArray(vectors) || vectors.length !== texts.length) {
+      console.error(json);
+      throw new Error('Unexpected number of embeddings');
+    }
+    return {
+      ollama: false as const,
+      embeddings: vectors,
+      retries,
+      ms,
+    };
+  }
+  const openaiJson = json as CreateEmbeddingResponse;
+  if (openaiJson.data.length !== texts.length) {
     console.error(json);
     throw new Error('Unexpected number of embeddings');
   }
-  const allembeddings = json.data;
+  const allembeddings = openaiJson.data;
   allembeddings.sort((a, b) => a.index - b.index);
   return {
     ollama: false as const,
     embeddings: allembeddings.map(({ embedding }) => embedding),
-    usage: json.usage?.total_tokens,
+    usage: openaiJson.usage?.total_tokens,
     retries,
     ms,
   };
@@ -393,6 +412,15 @@ interface CreateEmbeddingResponse {
   usage: {
     prompt_tokens: number;
     total_tokens: number;
+  };
+}
+
+interface MiniMaxEmbeddingResponse {
+  vectors: number[][];
+  total_tokens?: number;
+  base_resp?: {
+    status_code: number;
+    status_msg: string;
   };
 }
 

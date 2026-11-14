@@ -21,7 +21,8 @@
 }
 
 .font-system {
-  font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 
 :root {
@@ -36,6 +37,12 @@
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   }
+}
+
+html,
+body {
+  /* Avoid iOS rubber-banding and pull-to-refresh stealing map gestures. */
+  overscroll-behavior: none;
 }
 
 body {
@@ -182,4 +189,186 @@ p[contenteditable='true']:empty::before {
 
 .shape-top-left-corner {
   clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+/* ---------------------------------------------------------------------------
+ * Responsive layout for phones, tablets and desktop.
+ * ------------------------------------------------------------------------- */
+
+/* The app owns the viewport height on small screens so the canvas never spills
+ * outside the browser chrome; desktop keeps the original scrolling page. */
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (max-width: 1023px) {
+  .app-shell {
+    height: 100vh;
+    height: 100dvh;
+    height: var(--app-height, 100dvh);
+    overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Hidden on phones and short landscape screens to leave room for the map. */
+.app-tagline {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .app-tagline {
+    display: block;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .app-tagline {
+    display: none;
+  }
+}
+
+/* Game area + player/chat panel. Mobile: column with a fixed-height panel.
+ * Landscape phone: side by side so the map stays as large as possible. */
+.game-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+.game-map {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  /* Let pixi-viewport handle pan/pinch instead of the browser. */
+  touch-action: none;
+}
+
+.game-panel {
+  flex: 0 0 auto;
+  height: 34dvh;
+  min-height: 170px;
+  max-height: 45dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border-top: 8px solid #181425;
+  background-color: #3f2832;
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .game-shell {
+    flex-direction: row;
+  }
+  .game-panel {
+    width: min(42vw, 320px);
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    border-top-width: 0;
+    border-left: 8px solid #181425;
+  }
+}
+
+@media (min-width: 1024px) {
+  .game-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    min-height: 480px;
+  }
+  .game-panel {
+    width: 24rem;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    border-top-width: 0;
+    border-left: 8px solid #181425;
+  }
+}
+
+/* The pixel-art frame and chat bubbles are sized for wide screens; scale their
+ * borders down on phones so text and artwork keep enough room. */
+.game-frame {
+  border-width: 12px;
+}
+
+.chats {
+  border-width: 16px;
+}
+
+.bubble {
+  border-width: 18px;
+}
+
+.desc {
+  border-width: 28px;
+}
+
+.box {
+  border-width: 8px;
+}
+
+.login-prompt {
+  border-width: 24px;
+}
+
+@media (min-width: 640px) {
+  .game-frame {
+    border-width: 48px;
+  }
+  .chats {
+    border-width: 24px;
+  }
+  .bubble {
+    border-width: 30px;
+  }
+  .desc {
+    border-width: 56px;
+  }
+  .box {
+    border-width: 12px;
+  }
+  .login-prompt {
+    border-width: 48px;
+  }
+}
+
+/* Landscape phones: wide but short, so the width-based tablet/desktop styles
+ * above would leave almost no room for the map. Keep the chrome compact. */
+@media (max-height: 560px) {
+  /* The corner badge would cover a quarter of the map on a short screen. */
+  .app-shell .convex-badge {
+    display: none;
+  }
+  .app-shell .app-title {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    padding: 0.25rem 0.5rem;
+  }
+  .app-shell .app-footer {
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    gap: 0.5rem;
+  }
+  .app-shell .app-footer > div {
+    gap: 0.5rem;
+  }
+  .game-frame {
+    border-width: 12px;
+  }
+  .button {
+    height: 36px;
+    border-width: 0.7em;
+    font-size: 15px;
+  }
+  .button > div,
+  .button > span {
+    vertical-align: top;
+    line-height: 1;
+  }
 }

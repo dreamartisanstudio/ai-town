@@ -1,4 +1,5 @@
 import { useQuery } from 'convex/react';
+import { useEffect } from 'react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import closeImg from '../../assets/close.svg';
@@ -47,6 +48,12 @@ export default function PlayerDetails({
   );
 
   const playerDescription = playerId && game.playerDescriptions.get(playerId);
+
+  // Selecting a different agent should reveal their card from the top, which
+  // matters on phones where the panel is a small scrollable strip.
+  useEffect(() => {
+    scrollViewRef.current?.scrollTo({ top: 0 });
+  }, [playerId]);
 
   const startConversation = useSendInput(engineId, 'startConversation');
   const acceptInvite = useSendInput(engineId, 'acceptInvite');

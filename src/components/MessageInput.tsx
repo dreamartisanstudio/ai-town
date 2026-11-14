@@ -19,8 +19,9 @@ export function MessageInput({
   conversation: Conversation;
 }) {
   const descriptions = useQuery(api.world.gameDescriptions, { worldId });
-  const humanName = descriptions?.playerDescriptions.find((p) => p.playerId === humanPlayer.id)
-    ?.name;
+  const humanName = descriptions?.playerDescriptions.find(
+    (p) => p.playerId === humanPlayer.id,
+  )?.name;
   const inputRef = useRef<HTMLParagraphElement>(null);
   const inflightUuid = useRef<string | undefined>();
   const writeMessage = useMutation(api.messages.writeMessage);
@@ -80,13 +81,15 @@ export function MessageInput({
       </div>
       <div className={clsx('bubble', 'bubble-mine')}>
         <p
-          className="bg-white -mx-3 -my-1"
+          className="bg-white -mx-3 -my-1 break-words"
           ref={inputRef}
           contentEditable
           style={{ outline: 'none' }}
           tabIndex={0}
           placeholder="在这里输入…"
+          inputMode="text"
           onKeyDown={(e) => onKeyDown(e)}
+          onFocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
         />
       </div>
     </div>

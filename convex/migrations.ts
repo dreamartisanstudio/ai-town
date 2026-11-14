@@ -1,6 +1,7 @@
 import { internalMutation } from './_generated/server';
 import { Descriptions } from '../data/characters';
 import { DEFAULT_NAME } from './constants';
+import { stripReasoningBlocks } from './util/llm';
 
 // Rewrites the descriptions of an already-initialized world so existing NPCs pick up the
 // localized names and personas without wiping player memories or conversations.
@@ -86,5 +87,28 @@ export const localizeDefaultWorld = internalMutation({
     }
 
     return { updatedAgents, updatedPlayers };
+  },
+});
+
+// Removes model reasoning blocks from messages written before the LLM layer began
+// stripping them, so the UI doesn't show the model's internal deliberation.
+export const cleanMessageReasoning = internalMutation({
+  handler: async (ctx) => {
+    const messages = await ctx.db.query('messages').collect();
+    let updated = 0;
+    let skipped = 0;
+    for (const message of messages) {
+      const cleaned = stripReasoningBlocks(message.text);
+      if (cleaned === message.text) {
+        continue;
+      }
+      if (!cleaned) {
+        skipped += 1;
+        continue;
+      }
+      await ctx.db.patch(message._id, { text: cleaned });
+      updated += 1;
+    }
+    return { updated, skipped, total: messages.length };
   },
 });

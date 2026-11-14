@@ -179,8 +179,9 @@ export async function chatCompletion(
       if (content === undefined) {
         throw new Error('Unexpected result from OpenAI: ' + JSON.stringify(json));
       }
-      console.log(content);
-      return content;
+      const cleaned = stripReasoningBlocks(content);
+      console.log(cleaned);
+      return cleaned;
     }
   });
 
@@ -189,6 +190,14 @@ export async function chatCompletion(
     retries,
     ms,
   };
+}
+
+export function stripReasoningBlocks(content: string): string {
+  let text = content.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, '');
+  // Drop an unterminated reasoning block, e.g. when max_tokens cuts it off.
+  text = text.replace(/<think(?:ing)?>[\s\S]*$/gi, '');
+  text = text.replace(/<\/?think(?:ing)?>/gi, '');
+  return text.trim();
 }
 
 export async function tryPullOllama(model: string, error: string) {

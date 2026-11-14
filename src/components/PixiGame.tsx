@@ -35,11 +35,27 @@ export const PixiGame = (props: {
 
   const moveTo = useSendInput(props.engineId, 'moveTo');
 
-  // Interaction for clicking on the world to navigate.
-  const dragStart = useRef<{ screenX: number; screenY: number } | null>(null);
+  // Interaction for clicking/tapping on the world to navigate. Tracks the
+  // active pointers so a two-finger pinch never turns into a walk command.
+  const dragStart = useRef<{ screenX: number; screenY: number; pointerId: number } | null>(null);
+  const activePointers = useRef(new Set<number>());
+  const isPinching = useRef(false);
+
   const onMapPointerDown = (e: any) => {
     // https://pixijs.download/dev/docs/PIXI.FederatedPointerEvent.html
-    dragStart.current = { screenX: e.screenX, screenY: e.screenY };
+    activePointers.current.add(e.pointerId);
+    if (activePointers.current.size > 1) {
+      isPinching.current = true;
+      dragStart.current = null;
+      return;
+    }
+    dragStart.current = { screenX: e.screenX, screenY: e.screenY, pointerId: e.pointerId };
+  };
+  const onMapPointerEnd = (e: any) => {
+    activePointers.current.delete(e.pointerId);
+    if (activePointers.current.size === 0) {
+      isPinching.current = false;
+    }
   };
 
   const [lastDestination, setLastDestination] = useState<{
@@ -48,15 +64,19 @@ export const PixiGame = (props: {
     t: number;
   } | null>(null);
   const onMapPointerUp = async (e: any) => {
-    if (dragStart.current) {
-      const { screenX, screenY } = dragStart.current;
-      dragStart.current = null;
-      const [dx, dy] = [screenX - e.screenX, screenY - e.screenY];
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > 10) {
-        console.log(`Skipping navigation on drag event (${dist}px)`);
-        return;
-      }
+    const wasPinching = isPinching.current;
+    const start = dragStart.current;
+    onMapPointerEnd(e);
+    dragStart.current = null;
+    if (!start || wasPinching || start.pointerId !== e.pointerId) {
+      return;
+    }
+    const [dx, dy] = [start.screenX - e.screenX, start.screenY - e.screenY];
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const tapSlop = e.pointerType === 'touch' ? 16 : 10;
+    if (dist > tapSlop) {
+      console.log(`Skipping navigation on drag event (${dist}px)`);
+      return;
     }
     if (!humanPlayerId) {
       return;
@@ -106,6 +126,8 @@ export const PixiGame = (props: {
         map={props.game.worldMap}
         onpointerup={onMapPointerUp}
         onpointerdown={onMapPointerDown}
+        onpointerupoutside={onMapPointerEnd}
+        onpointercancel={onMapPointerEnd}
       />
       {players.map(
         (p) =>

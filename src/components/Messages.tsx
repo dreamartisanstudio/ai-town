@@ -41,7 +41,8 @@ export function Messages({
     descriptions?.playerDescriptions.find((p) => p.playerId === currentlyTyping?.playerId)?.name;
 
   const scrollView = scrollViewRef.current;
-  const isScrolledToBottom = useRef(false);
+  // Start pinned to the newest message, then respect manual scrolling.
+  const isScrolledToBottom = useRef(true);
   useEffect(() => {
     if (!scrollView) return undefined;
 
@@ -71,14 +72,14 @@ export function Messages({
   const messageNodes: { time: number; node: React.ReactNode }[] = messages.map((m) => {
     const node = (
       <div key={`text-${m._id}`} className="leading-tight mb-6">
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-x-4">
           <span className="uppercase flex-grow">{m.authorName}</span>
           <time dateTime={m._creationTime.toString()}>
             {new Date(m._creationTime).toLocaleString()}
           </time>
         </div>
         <div className={clsx('bubble', m.author === humanPlayerId && 'bubble-mine')}>
-          <p className="bg-white -mx-3 -my-1">{m.text}</p>
+          <p className="bg-white -mx-3 -my-1 break-words">{m.text}</p>
         </div>
       </div>
     );

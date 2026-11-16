@@ -4,7 +4,7 @@ export default function PoweredByConvex() {
     <a
       href="https://convex.dev/c/ai-town"
       target="_blank"
-      className="group absolute top-0 left-0 w-64 h-64 md:block z-10 hidden shape-top-left-corner overflow-hidden"
+      className="convex-badge group absolute top-0 left-0 w-64 h-64 md:block z-10 hidden shape-top-left-corner overflow-hidden"
       aria-label="由 Convex 提供支持"
     >
       <img

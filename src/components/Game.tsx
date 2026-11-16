@@ -14,6 +14,15 @@ import { useServerGame } from '../hooks/serverGame.ts';
 
 export const SHOW_DEBUG_UI = !!import.meta.env.VITE_SHOW_DEBUG_UI;
 
+// Cap the renderer's backing store at 2x so high-DPI phones don't render
+// four times the pixels for marginal sharpness on pixel-art sprites.
+const stageOptions = {
+  backgroundColor: 0x7ab5ff,
+  antialias: false,
+  resolution: Math.min(window.devicePixelRatio || 1, 2),
+  autoDensity: true,
+};
+
 export default function Game() {
   const convex = useConvex();
   const [selectedElement, setSelectedElement] = useState<{
@@ -42,32 +51,30 @@ export default function Game() {
   return (
     <>
       {SHOW_DEBUG_UI && <DebugTimeManager timeManager={timeManager} width={200} height={100} />}
-      <div className="mx-auto w-full max-w grid grid-rows-[240px_1fr] lg:grid-rows-[1fr] lg:grid-cols-[1fr_auto] lg:grow max-w-[1400px] min-h-[480px] game-frame">
+      <div className="game-shell mx-auto max-w-[1400px] game-frame">
         {/* Game area */}
-        <div className="relative overflow-hidden bg-brown-900" ref={gameWrapperRef}>
+        <div className="game-map bg-brown-900" ref={gameWrapperRef}>
           <div className="absolute inset-0">
-            <div className="container">
-              <Stage width={width} height={height} options={{ backgroundColor: 0x7ab5ff }}>
-                {/* Re-propagate context because contexts are not shared between renderers.
+            <Stage width={width} height={height} options={stageOptions}>
+              {/* Re-propagate context because contexts are not shared between renderers.
 https://github.com/michalochman/react-pixi-fiber/issues/145#issuecomment-531549215 */}
-                <ConvexProvider client={convex}>
-                  <PixiGame
-                    game={game}
-                    worldId={worldId}
-                    engineId={engineId}
-                    width={width}
-                    height={height}
-                    historicalTime={historicalTime}
-                    setSelectedElement={setSelectedElement}
-                  />
-                </ConvexProvider>
-              </Stage>
-            </div>
+              <ConvexProvider client={convex}>
+                <PixiGame
+                  game={game}
+                  worldId={worldId}
+                  engineId={engineId}
+                  width={width}
+                  height={height}
+                  historicalTime={historicalTime}
+                  setSelectedElement={setSelectedElement}
+                />
+              </ConvexProvider>
+            </Stage>
           </div>
         </div>
         {/* Right column area */}
         <div
-          className="flex flex-col overflow-y-auto shrink-0 px-4 py-6 sm:px-6 lg:w-96 xl:pr-6 border-t-8 sm:border-t-0 sm:border-l-8 border-brown-900  bg-brown-800 text-brown-100"
+          className="game-panel flex flex-col px-4 py-4 sm:px-6 lg:py-6 text-brown-100"
           ref={scrollViewRef}
         >
           <PlayerDetails

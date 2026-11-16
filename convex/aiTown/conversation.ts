@@ -291,7 +291,12 @@ export const conversationInputs = {
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID: ${conversationId}`);
+        // The conversation can end between the client rendering and the
+        // keystroke landing. Typing indicators are decorative, so drop them
+        // instead of failing the input (which surfaces as an unhandled
+        // rejection in the browser).
+        console.warn(`startTyping: ignoring missing conversation ${conversationId}`);
+        return null;
       }
       if (conversation.isTyping && conversation.isTyping.playerId !== playerId) {
         throw new Error(
@@ -314,7 +319,10 @@ export const conversationInputs = {
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID: ${conversationId}`);
+        // Same race as startTyping: the message is already persisted by the
+        // client, so this bookkeeping step is safe to skip.
+        console.warn(`finishSendingMessage: ignoring missing conversation ${conversationId}`);
+        return null;
       }
       if (conversation.isTyping && conversation.isTyping.playerId === playerId) {
         delete conversation.isTyping;
@@ -342,7 +350,10 @@ export const conversationInputs = {
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID ${conversationId}`);
+        // The invite may have expired while it was displayed. Surface a
+        // readable reason (toasted by the client) instead of a raw ID.
+        console.warn(`acceptInvite: missing conversation ${conversationId}`);
+        throw new Error('这次对话邀请已失效，请重新发起对话。');
       }
       conversation.acceptInvite(game, player);
       return null;
@@ -365,7 +376,8 @@ export const conversationInputs = {
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID ${conversationId}`);
+        console.warn(`rejectInvite: ignoring missing conversation ${conversationId}`);
+        return null;
       }
       conversation.rejectInvite(game, now, player);
       return null;
@@ -386,7 +398,10 @@ export const conversationInputs = {
       const conversationId = parseGameId('conversations', args.conversationId);
       const conversation = game.world.conversations.get(conversationId);
       if (!conversation) {
-        throw new Error(`Invalid conversation ID ${conversationId}`);
+        // Already gone: leaving is a no-op, not an error worth interrupting the
+        // player with.
+        console.warn(`leaveConversation: ignoring missing conversation ${conversationId}`);
+        return null;
       }
       conversation.leave(game, now, player);
       return null;

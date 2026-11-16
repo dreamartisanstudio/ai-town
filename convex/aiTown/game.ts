@@ -12,7 +12,7 @@ import { WorldMap, serializedWorldMap } from './worldMap';
 import { PlayerDescription, serializedPlayerDescription } from './playerDescription';
 import { Location, locationFields, playerLocation } from './location';
 import { runAgentOperation } from './agent';
-import { GameId, IdTypes, allocGameId } from './ids';
+import { GameId, IdTypes, allocGameId, parseGameId } from './ids';
 import { InputArgs, InputNames, inputs } from './inputs';
 import {
   AbstractGame,
@@ -158,6 +158,16 @@ export class Game extends AbstractGame {
     const handler = inputs[name]?.handler;
     if (!handler) {
       throw new Error(`Invalid input: ${name}`);
+    }
+    // Any input carrying a human playerId counts as activity. Without this,
+    // Player.tick removes the player after HUMAN_IDLE_TOO_LONG even while they
+    // are actively moving and chatting.
+    const playerIdArg = (args as { playerId?: string }).playerId;
+    if (playerIdArg) {
+      const player = this.world.players.get(parseGameId('players', playerIdArg));
+      if (player?.human) {
+        player.lastInput = now;
+      }
     }
     return handler(this, now, args as any);
   }

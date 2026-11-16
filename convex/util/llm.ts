@@ -175,9 +175,21 @@ export async function chatCompletion(
       return new ChatCompletionContent(result.body!, stopWords);
     } else {
       const json = (await result.json()) as CreateChatCompletionResponse;
-      const content = json.choices[0].message?.content;
-      if (content === undefined) {
-        throw new Error('Unexpected result from OpenAI: ' + JSON.stringify(json));
+      const baseResp = json.base_resp;
+      if (baseResp && baseResp.status_code !== 0) {
+        // Providers like MiniMax answer HTTP 200 even when the request failed
+        // (e.g. quota exhausted or invalid key), so `result.ok` never notices.
+        const message = `Chat completion failed (${baseResp.status_code}): ${baseResp.status_msg}`;
+        console.error(message);
+        throw { retry: false, error: new Error(message) };
+      }
+      const content = json.choices?.[0]?.message?.content;
+      if (content === undefined || content === null) {
+        console.error(json);
+        throw {
+          retry: false,
+          error: new Error('Unexpected result from LLM: ' + JSON.stringify(json)),
+        };
       }
       const cleaned = stripReasoningBlocks(content);
       console.log(cleaned);
@@ -253,7 +265,16 @@ export async function fetchEmbeddingBatch(texts: string[]) {
         error: new Error(`Embedding failed with code ${result.status}: ${await result.text()}`),
       };
     }
-    return (await result.json()) as CreateEmbeddingResponse | MiniMaxEmbeddingResponse;
+    const json = (await result.json()) as CreateEmbeddingResponse | MiniMaxEmbeddingResponse;
+    const baseResp = (json as Partial<MiniMaxEmbeddingResponse>).base_resp;
+    if (baseResp && baseResp.status_code !== 0) {
+      // Same HTTP-200-on-failure issue as chat completions: an exhausted
+      // balance returns `{"vectors": null, "base_resp": {status_code: 1008}}`.
+      const message = `Embedding failed (${baseResp.status_code}): ${baseResp.status_msg}`;
+      console.error(message);
+      throw { retry: false, error: new Error(message) };
+    }
+    return json;
   });
   if (isMiniMax) {
     const vectors = (json as MiniMaxEmbeddingResponse).vectors;
@@ -393,7 +414,7 @@ interface CreateChatCompletionResponse {
   object: string;
   created: number;
   model: string;
-  choices: {
+  choices?: {
     index?: number;
     message?: {
       role: 'system' | 'user' | 'assistant';
@@ -407,6 +428,11 @@ interface CreateChatCompletionResponse {
     prompt_tokens: number;
 
     total_tokens: number;
+  };
+  // MiniMax reports failures inside a 200 response via this field.
+  base_resp?: {
+    status_code: number;
+    status_msg: string;
   };
 }
 

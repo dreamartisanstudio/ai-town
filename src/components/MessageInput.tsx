@@ -4,6 +4,7 @@ import { KeyboardEvent, useRef, useState } from 'react';
 import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { useSendInput } from '../hooks/sendInput';
+import { toastOnError } from '../toasts';
 import { Player } from '../../convex/aiTown/player';
 import { Conversation } from '../../convex/aiTown/conversation';
 
@@ -45,6 +46,10 @@ export function MessageInput({
           conversationId: conversation.id,
           messageUuid: inflightUuid.current,
         });
+      } catch (e) {
+        // The conversation can be archived between render and keystroke; a
+        // stale ID must not surface as an unhandled rejection.
+        console.warn('Failed to send typing indicator', e);
       } finally {
         inflightUuid.current = undefined;
       }
@@ -66,13 +71,15 @@ export function MessageInput({
       messageUuid = currentlyTyping.messageUuid;
     }
     messageUuid = messageUuid || crypto.randomUUID();
-    await writeMessage({
-      worldId,
-      playerId: humanPlayer.id,
-      conversationId: conversation.id,
-      text,
-      messageUuid,
-    });
+    await toastOnError(
+      writeMessage({
+        worldId,
+        playerId: humanPlayer.id,
+        conversationId: conversation.id,
+        text,
+        messageUuid,
+      }),
+    );
   };
   return (
     <div className="leading-tight mb-6">

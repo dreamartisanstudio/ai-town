@@ -246,7 +246,11 @@ export const previousConversation = query({
         .withIndex('worldId', (q) => q.eq('worldId', args.worldId).eq('id', member.conversationId))
         .unique();
       if (!conversation) {
-        throw new Error(`Invalid conversation ID: ${member.conversationId}`);
+        // Stale history rows (e.g. from a world reset) can point at a
+        // conversation that was never archived. Skip instead of failing the
+        // whole query, which would break the conversation panel in the UI.
+        console.warn(`Missing archived conversation ${member.conversationId}, skipping.`);
+        continue;
       }
       if (conversation.numMessages > 0) {
         return conversation;

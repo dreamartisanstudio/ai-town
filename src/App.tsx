@@ -1,7 +1,6 @@
 import Game from './components/Game.tsx';
 
 import { ToastContainer } from 'react-toastify';
-import a16zImg from '../assets/a16z.png';
 import starImg from '../assets/star.svg';
 import helpImg from '../assets/help.svg';
 // import { UserButton } from '@clerk/clerk-react';
@@ -14,6 +13,7 @@ import Button from './components/buttons/Button.tsx';
 import InteractButton from './components/buttons/InteractButton.tsx';
 import FreezeButton from './components/FreezeButton.tsx';
 import { MAX_HUMAN_PLAYERS } from '../convex/constants.ts';
+import AppMenu from './components/AppMenu.tsx';
 
 export default function Home() {
   const [helpModalOpen, setHelpModalOpen] = useState(false);
@@ -100,22 +100,17 @@ export default function Home() {
 
         <Game />
 
-        <footer className="app-footer justify-end bottom-0 left-0 w-full flex items-center mt-2 gap-2 p-2 sm:mt-4 sm:gap-3 sm:p-6 flex-wrap pointer-events-none">
-          <div className="flex gap-2 sm:gap-4 flex-grow flex-wrap pointer-events-none">
-            <FreezeButton />
-            <MusicButton />
-            <Button href="https://github.com/a16z-infra/ai-town" imgUrl={starImg}>
-              收藏
-            </Button>
-            <InteractButton />
-            <Button imgUrl={helpImg} onClick={() => setHelpModalOpen(true)}>
-              帮助
-            </Button>
-          </div>
-          <a href="https://a16z.com">
-            <img className="w-8 h-8 pointer-events-auto" src={a16zImg} alt="a16z" />
-          </a>
-        </footer>
+        <AppMenu>
+          <FreezeButton />
+          <MusicButton />
+          <Button href="https://github.com/a16z-infra/ai-town" imgUrl={starImg}>
+            收藏
+          </Button>
+          <InteractButton />
+          <Button imgUrl={helpImg} onClick={() => setHelpModalOpen(true)}>
+            帮助
+          </Button>
+        </AppMenu>
         <ToastContainer position="bottom-right" autoClose={2000} closeOnClick theme="dark" />
       </div>
     </main>

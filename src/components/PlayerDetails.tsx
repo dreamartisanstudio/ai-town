@@ -18,6 +18,7 @@ export default function PlayerDetails({
   playerId,
   setSelectedElement,
   scrollViewRef,
+  onClose,
 }: {
   worldId: Id<'worlds'>;
   engineId: Id<'engines'>;
@@ -25,6 +26,7 @@ export default function PlayerDetails({
   playerId?: GameId<'players'>;
   setSelectedElement: SelectElement;
   scrollViewRef: React.RefObject<HTMLDivElement>;
+  onClose?: () => void;
 }) {
   const humanTokenIdentifier = useQuery(api.world.userStatus, { worldId });
 
@@ -148,7 +150,10 @@ export default function PlayerDetails({
         </div>
         <a
           className="button text-white shadow-solid text-2xl cursor-pointer pointer-events-auto"
-          onClick={() => setSelectedElement(undefined)}
+          onClick={() => {
+            setSelectedElement(undefined);
+            onClose?.();
+          }}
         >
           <h2 className="h-full bg-clay-700">
             <img className="w-4 h-4 sm:w-5 sm:h-5" src={closeImg} />

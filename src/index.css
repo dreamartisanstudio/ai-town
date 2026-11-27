@@ -368,3 +368,263 @@ p[contenteditable='true']:empty::before {
     line-height: 1;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * DRE-239: phone game layout — fullscreen map, collapsible bottom chat sheet,
+ * floating menu. Scoped to small screens so the desktop layout is untouched.
+ * ------------------------------------------------------------------------- */
+
+/* Hidden unless the mobile layout below is active. */
+.mobile-fab,
+.mobile-backdrop,
+.game-panel-handle {
+  display: none;
+}
+
+.game-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1023px) {
+  /* Follow the visual viewport (--app-height) instead of dvh so the bottom
+   * sheet stays above the on-screen keyboard, and can shrink below dvh. */
+  .app-shell {
+    min-height: 0;
+    height: var(--app-height, 100dvh);
+  }
+
+  /* The map owns the screen; the title and tagline move out of the way. */
+  .app-title,
+  .app-tagline {
+    display: none;
+  }
+
+  .app-shell .app-footer {
+    /* The footer is re-used as the drawer below. */
+    margin-top: 0;
+  }
+
+  .game-shell {
+    position: relative;
+    display: block;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+  }
+
+  .game-frame {
+    border-width: 0;
+  }
+
+  .game-map {
+    position: absolute;
+    inset: 0;
+    flex: none;
+  }
+
+  /* Bottom sheet: collapsed keeps only the drag/expand handle. */
+  .game-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    min-height: 0;
+    max-height: calc(2.85rem + env(safe-area-inset-bottom, 0px));
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow: hidden;
+    background-color: rgba(63, 40, 50, 0.97);
+    border-top: 3px solid #181425;
+    border-left-width: 0;
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.45);
+    transition: max-height 200ms ease-out;
+  }
+  .game-panel--open {
+    max-height: min(62dvh, 85%);
+  }
+
+  .game-panel-handle {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 2.85rem;
+    padding: 0.5rem 1rem;
+    color: #ead4aa;
+    background: #3f2832;
+    border: 0;
+    font-family: 'Upheaval Pro', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .game-panel-grip {
+    width: 2.5rem;
+    height: 4px;
+    border-radius: 2px;
+    background: #8b9bb4;
+    opacity: 0.8;
+  }
+  .game-panel-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: #fec742;
+  }
+  .game-panel-chevron {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    transform: translateY(-50%) rotate(180deg);
+    transition: transform 200ms ease;
+  }
+  .game-panel--open .game-panel-chevron {
+    transform: translateY(-50%) rotate(0deg);
+  }
+
+  .game-panel-body {
+    display: none;
+    padding: 0.5rem 1rem 0.75rem;
+  }
+  .game-panel--open .game-panel-body {
+    display: flex;
+  }
+
+  /* Floating menu button. */
+  .mobile-fab {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+    right: calc(env(safe-area-inset-right, 0px) + 0.75rem);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    color: #fff;
+    background: #3a4466;
+    border: 3px solid #181425;
+    border-radius: 10px;
+    box-shadow: 0 3px 0 #181425;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-fab:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #181425;
+  }
+  .mobile-fab svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    display: block;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;
+  }
+  .mobile-backdrop--open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Footer re-used as a slide-in drawer. */
+  .app-footer.mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: auto;
+    z-index: 56;
+    width: min(80vw, 320px);
+    height: var(--app-height, 100dvh);
+    margin: 0;
+    padding: calc(env(safe-area-inset-top, 0px) + 1rem) 1rem
+      calc(env(safe-area-inset-bottom, 0px) + 1rem);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    background: #3f2832;
+    border-left: 4px solid #181425;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    transform: translateX(105%);
+    transition: transform 200ms ease-out;
+    pointer-events: auto;
+  }
+  .app-footer.mobile-drawer--open {
+    transform: translateX(0);
+  }
+
+  .mobile-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #181425;
+    color: #ead4aa;
+    font-family: 'Upheaval Pro', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+  }
+  .app-menu-items {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0.7rem;
+    width: 100%;
+  }
+  .app-menu-items .button {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 2.75rem;
+  }
+  .app-menu-items .button > div {
+    display: block;
+    width: 100%;
+  }
+  .app-menu-items .button > div > span {
+    display: block;
+  }
+  .app-menu-items .button > div > span > div {
+    display: flex;
+  }
+
+  .mobile-drawer-brand {
+    margin-top: auto;
+    padding-top: 1rem;
+    color: #8b9bb4;
+    font-family: 'Upheaval Pro', sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 0.1em;
+  }
+  .app-menu-brands {
+    display: none;
+  }
+}

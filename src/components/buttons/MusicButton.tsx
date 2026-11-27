@@ -43,7 +43,6 @@ export default function MusicButton() {
     <>
       <Button
         onClick={() => void flipSwitch()}
-        className="hidden lg:block"
         title="播放 AI 生成的音乐（按 m 键播放/静音）"
         imgUrl={volumeImg}
       >

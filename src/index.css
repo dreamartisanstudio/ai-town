@@ -341,10 +341,6 @@ p[contenteditable='true']:empty::before {
 /* Landscape phones: wide but short, so the width-based tablet/desktop styles
  * above would leave almost no room for the map. Keep the chrome compact. */
 @media (max-height: 560px) {
-  /* The corner badge would cover a quarter of the map on a short screen. */
-  .app-shell .convex-badge {
-    display: none;
-  }
   .app-shell .app-title {
     font-size: 1.75rem;
     line-height: 1.1;
